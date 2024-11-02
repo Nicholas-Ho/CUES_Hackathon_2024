@@ -15,7 +15,7 @@ my_cat = cat_status.Cat()
 food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 layer = database.data_layer.DataLayer(food_data_path)
 
-def main():
+def main(my_cat, dt):
     ans = user_input.get_input_data()
     cal = nutrient.calories_recommended(ans["gender"], ans["height"], ans["weight"], ans["age"], ans["exercise_level"])
     ideal_cat = cat_status.Cat(calories=cal, 
@@ -56,5 +56,5 @@ def check_food(my_cat, layer):
 
     
 if __name__ == "__main__":
-    main()
+    main(my_cat,dt)
     threading.Thread(target=check_food(my_cat, layer), daemon=True).start()

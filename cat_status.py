@@ -1,6 +1,7 @@
 import nutrient
 import database.food_database
 import database.data_layer
+from pathlib import Path
 
 class Cat:
     def __init__(self, size=2, happiness=True, calories=0, sugar=0, protein=0, total_fat=0, saturated_fat=0, trans_fat=0, salt=0, diabetes=0, hbp=0, cholesterol=0, death=0):
@@ -53,8 +54,11 @@ def cat_day(cat, ideal_cat):
     return cat
     
 def cat_hour(cat, ideal_cat):
-    cat.calories-= ideal_cat.calories / 24
-    cat.size = cat.calories // ideal_cat.calories + 2
+    cat.calories -= ideal_cat.calories / 24
+    if cat.calories < 0:
+        cat.size = cat.calories // ideal_cat.calories + 3  
+    else:
+        cat.size = cat.calories // ideal_cat.calories + 2
 
     if cat.size<0:
         dead = cat.death + 1
@@ -62,9 +66,9 @@ def cat_hour(cat, ideal_cat):
     
     return cat
 
-def cat_eat(cat, food):
-    food_data_path = Path(__file__).parent / "data/restaurant_sample.csv"
-    layer = DataLayer(food_data_path)
+def cat_eat(cat, food, layer):
+    food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
+    layer = database.data_layer.DataLayer(food_data_path)
     nutrition = layer.search_food_entries(food)
     cat.calories += nutrition.calories
     cat.sugar += nutrition.sugars
