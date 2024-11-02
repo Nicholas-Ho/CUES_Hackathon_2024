@@ -1,5 +1,5 @@
 import nutrient
-import cat_class
+import cat_status
 import frontend_logic
 import time
 
@@ -15,7 +15,7 @@ def main():
                     total_fat=nutrient.total_fat_recommened(cal), 
                     saturated_fat=nutrient.saturated_fat_recommended(cal), 
                     trans_fat=5,
-                    salt=6)
+                    salt=6000)
 
     while True:
         pass

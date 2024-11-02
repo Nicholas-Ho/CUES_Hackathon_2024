@@ -1,5 +1,6 @@
 import nutrient
-import 
+import database.food_database
+import database.data_layer
 
 class Cat:
     def __init__(self, size=2, happiness=True, calories=0, sugar=0, protein=0, total_fat=0, saturated_fat=0, trans_fat=0, salt=0, diabetes=0, hbp=0, cholesterol=0, death=0):
@@ -55,6 +56,17 @@ def cat_hour(cat, ideal_cat):
     if cat.size<0:
         cat.death = 1
 
-def cat_eat()
+def cat_eat(cat, food):
+    food_data_path = Path(__file__).parent / "data/restaurant_sample.csv"
+    layer = DataLayer(food_data_path)
+    nutrition = layer.search_food_entries(food)
+    cat.calories += nutrition.calories
+    cat.sugar += nutrition.sugars
+    cat.protein += nutrition.protein
+    cat.total_fat += nutrition.total_fat
+    cat.saturated_fat += nutrition.saturated_fat
+    cat.trans_fat += nutrition.trans_fatty_acid
+    cat.salt += nutrition.calories
+
 
                 
