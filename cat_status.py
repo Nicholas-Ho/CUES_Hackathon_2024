@@ -47,14 +47,20 @@ def cat_day(cat, ideal_cat):
         cat.cholesterol = 0
 
     if cat.diabetes>2 or cat.hbp>2 or cat.cholesterol>2:
-        cat.death = 1
+        dead = cat.death + 1
+        cat = Cat(death = dead)
+
+    return cat
     
 def cat_hour(cat, ideal_cat):
     cat.calories-= ideal_cat.calories / 24
     cat.size = cat.calories // ideal_cat.calories + 2
 
     if cat.size<0:
-        cat.death = 1
+        dead = cat.death + 1
+        cat = Cat(death = dead)
+    
+    return cat
 
 def cat_eat(cat, food):
     food_data_path = Path(__file__).parent / "data/restaurant_sample.csv"
@@ -67,6 +73,8 @@ def cat_eat(cat, food):
     cat.saturated_fat += nutrition.saturated_fat
     cat.trans_fat += nutrition.trans_fatty_acid
     cat.salt += nutrition.calories
+
+    return cat
 
 
                 

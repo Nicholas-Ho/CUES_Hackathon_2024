@@ -17,7 +17,7 @@ layer = database.data_layer.DataLayer(food_data_path)
 
 def main():
     ans = user_input.get_input_data()
-    cal = nutrient.calories_recommended(ans["gender"], ans["height"], ans["weight2"], ans["age"], ans["active"])
+    cal = nutrient.calories_recommended(ans["gender"], ans["height"], ans["weight"], ans["age"], ans["exercise_level"])
     ideal_cat = cat_status.Cat(calories=cal, 
                     sugar=nutrient.free_sugar(cal), 
                     protein=nutrient.protein_recommended(cal), 
@@ -30,9 +30,9 @@ def main():
     
     while True:
         if t == 24:
-            cat_status.cat_day(my_cat, ideal_cat)
+            my_cat = cat_status.cat_day(my_cat, ideal_cat)
             t = 0
-        cat_status.cat_hour(my_cat, ideal_cat)
+        my_cat = cat_status.cat_hour(my_cat, ideal_cat)
 
         if my_cat.death > 0:
             cat.dead_cat(my_cat.death)
@@ -46,15 +46,15 @@ def main():
             cat.high_cholestrol()
         else:
             cat.create_fat_happy_cat(my_cat.size)
-
+        t+=1
         time.sleep(dt)
 
 def check_food(my_cat, layer):
     food = input("what did you eat?")
     if food != None:
-        cat_status.cat_eat(my_cat, food, layer)
+        my_cat = cat_status.cat_eat(my_cat, food, layer)
 
     
 if __name__ == "__main__":
-    threading.Thread(target=check_food(my_cat, layer), daemon=True).start()
     main()
+    threading.Thread(target=check_food(my_cat, layer), daemon=True).start()
