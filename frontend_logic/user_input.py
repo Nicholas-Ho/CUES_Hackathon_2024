@@ -54,5 +54,4 @@ def get_input_data():
             ans["exercise_level"]=int(exercise_level)
             break
     return ans
-print(get_input_data())
 

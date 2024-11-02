@@ -2,10 +2,10 @@ import nutrient
 import database.food_database
 import database.data_layer
 
-
 class Cat:
-    def __init__(self, size=2, calories=0, sugar=0, protein=0, total_fat=0, saturated_fat=0, trans_fat=0, salt=0, diabetes=0, hbp=0, cholesterol=0, death=0):
+    def __init__(self, size=2, happiness=True, calories=0, sugar=0, protein=0, total_fat=0, saturated_fat=0, trans_fat=0, salt=0, diabetes=0, hbp=0, cholesterol=0, death=0):
         self.size = size
+        self.happiness = happiness
         self.calories = calories
         self.sugar = sugar
         self.protein = protein
@@ -47,19 +47,18 @@ def cat_day(cat, ideal_cat):
         cat.cholesterol = 0
 
     if cat.diabetes>2 or cat.hbp>2 or cat.cholesterol>2:
-        cat.death += 1
-        cat = Cat()
+        cat.death = 1
     
 def cat_hour(cat, ideal_cat):
     cat.calories-= ideal_cat.calories / 24
     cat.size = cat.calories // ideal_cat.calories + 2
 
     if cat.size<0:
-        cat.death += 1
-        cat = Cat()
+        cat.death = 1
 
-def cat_eat(cat, food, layer):
-
+def cat_eat(cat, food):
+    food_data_path = Path(__file__).parent / "data/restaurant_sample.csv"
+    layer = DataLayer(food_data_path)
     nutrition = layer.search_food_entries(food)
     cat.calories += nutrition.calories
     cat.sugar += nutrition.sugars
