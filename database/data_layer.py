@@ -1,4 +1,4 @@
-from food_database import FoodDatabase
+from .food_database import FoodDatabase
 from pathlib import Path
 
 class DataLayer:
