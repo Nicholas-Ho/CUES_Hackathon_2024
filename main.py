@@ -9,9 +9,10 @@ import time
 import threading
 from frontend_logic import cat
 import copy
+import os
 
 # Time interval (in seconds)
-dt = 1
+dt = 0.2
 my_cat = cat_status.Cat()
 food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 layer = database.data_layer.DataLayer(food_data_path)
@@ -26,6 +27,7 @@ def main(my_cat, dt):
                     saturated_fat=nutrient.saturated_fat_recommended(cal), 
                     trans_fat=5,
                     salt=6000)
+    os.system('cls' if os.name == 'nt' else 'clear')
     cat.create_fat_happy_cat(my_cat.size)
     t = 0
     update(t, my_cat, ideal_cat, dt)
@@ -46,6 +48,7 @@ def update(t, my_cat, ideal_cat, dt):
     my_cat = cat_status.cat_hour(my_cat, ideal_cat)
 
     if my_cat.equal_graphics(old_cat) == False:
+        cat.clear_lines()
         if my_cat.death > 0:
             cat.dead_cat(my_cat.death)
         if my_cat.diabetes > 0 or my_cat.hbp > 0 or my_cat.cholesterol > 0:

@@ -1,3 +1,4 @@
+import shutil
 def create_fat_sad_cat(fatness=2):
     spaces = ' ' * int(fatness)
     fatness_sad = f"""
@@ -14,6 +15,7 @@ def create_fat_happy_cat(fatness=2):
 ({spaces}o.o{spaces}) 
 >{spaces} ^{spaces} <  
 """
+    clear_lines()
     print(fatness_happy)
 # print(create_fat_happy_cat())
 
@@ -55,3 +57,9 @@ def high_cholestrol():
                   \\_________________/
     """
     print(cat)
+
+def clear_lines():
+    n = shutil.get_terminal_size().lines
+    for _ in range(n - 1):
+        print("\033[F\033[K", end='') 
+    print("\033[F", end='')
