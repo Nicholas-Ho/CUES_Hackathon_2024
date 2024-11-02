@@ -1,13 +1,12 @@
 from .food_database import FoodDatabase, NutritionData
 from .user_datastore import UserDatastore
-from ..cat_status import Cat
 import time
 from pathlib import Path
 
 class DataLayer:
-    def __init__(self, food_data_path, user_db_path):
+    def __init__(self, food_data_path, user_db_path, multithreading=False):
         self._food_database = FoodDatabase(food_data_path)
-        self._user_datastore = UserDatastore(user_db_path)
+        self._user_datastore = UserDatastore(user_db_path, not multithreading)
 
     # Food database
     def get_food_entry(self, item_id):
@@ -31,13 +30,13 @@ class DataLayer:
     def get_food_records(self):
         return self._user_datastore.query(UserDatastore.FOOD_RECORDS_TABLE)
     
-    def set_user_config(self, age, gender, weight, height, exercise_level):
+    def set_user_config(self, user_config: dict):
         update_dict = {
-            "Age": age,
-            "Gender": (gender.upper() == 'F'),
-            "Weight": weight,
-            "Height": height,
-            "ExerciseLevel": exercise_level
+            "Age": user_config["age"],
+            "Gender": (user_config["gender"].upper() == 'F'),
+            "Weight": user_config["weight"],
+            "Height": user_config["height"],
+            "ExerciseLevel": user_config["exercise_level"]
         }
         if self._user_datastore.get_table_size(UserDatastore.USER_CONFIG_TABLE) == 0:
             self._user_datastore.insert(UserDatastore.USER_CONFIG_TABLE, update_dict)
@@ -45,9 +44,18 @@ class DataLayer:
             self._user_datastore.update(UserDatastore.USER_CONFIG_TABLE, update_dict, {}, singleton=True)
 
     def get_user_config(self):
-        return self._user_datastore.query(UserDatastore.USER_CONFIG_TABLE)[0]
+        result = self._user_datastore.query(UserDatastore.USER_CONFIG_TABLE)
+        if len(result) > 0:
+            return {
+                "age": result[0][0],
+                "gender": result[0][1],
+                "weight": result[0][2],
+                "height": result[0][3],
+                "exercise_level": result[0][4],
+            }
+        return None
     
-    def update_cat_data(self, cat: Cat):
+    def update_cat_data(self, cat):
         update_dict = {
             "Size": cat.size,
             "Calories": cat.calories,

@@ -14,10 +14,16 @@ import copy
 dt = 1
 my_cat = cat_status.Cat()
 food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
-layer = database.data_layer.DataLayer(food_data_path)
+user_db_path = Path(__file__).parent / "database/userdata/userdata.db"
+layer = database.data_layer.DataLayer(food_data_path, user_db_path, multithreading=True)
 
 def main(my_cat, dt):
-    ans = user_input.get_input_data()
+    ans = layer.get_user_config()
+    if ans is not None:
+        print("User data loaded from prior session.")
+    else:
+        ans = user_input.get_input_data()
+        layer.set_user_config(ans)
     cal = nutrient.calories_recommended(ans["gender"], ans["height"], ans["weight"], ans["age"], ans["exercise_level"])
     ideal_cat = cat_status.Cat(calories=cal, 
                     sugar=nutrient.free_sugar(cal), 
@@ -28,7 +34,7 @@ def main(my_cat, dt):
                     salt=6000)
     cat.create_fat_happy_cat(my_cat.size)
     t = 0
-    update(t, my_cat, ideal_cat, dt)
+    update(t, my_cat, ideal_cat, dt, layer)
     while True:
         check_food(my_cat, layer)
     
@@ -38,12 +44,12 @@ def check_food(my_cat, layer):
     if food != None:
         my_cat = cat_status.cat_eat(my_cat, food, layer)
 
-def update(t, my_cat, ideal_cat, dt):
+def update(t, my_cat, ideal_cat, dt, layer):
     old_cat = copy.deepcopy(my_cat)
     if t == 24:
-        my_cat = cat_status.cat_day(my_cat, ideal_cat)
+        my_cat = cat_status.cat_day(my_cat, ideal_cat, layer)
         t = 0
-    my_cat = cat_status.cat_hour(my_cat, ideal_cat)
+    my_cat = cat_status.cat_hour(my_cat, ideal_cat, layer)
 
     if my_cat.equal_graphics(old_cat) == False:
         if my_cat.death > 0:
@@ -59,7 +65,7 @@ def update(t, my_cat, ideal_cat, dt):
         else:
             cat.create_fat_happy_cat(my_cat.size)
     t+=1
-    threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt)).start()
+    threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt, layer)).start()
 
 if __name__ == "__main__":
     main(my_cat,dt)

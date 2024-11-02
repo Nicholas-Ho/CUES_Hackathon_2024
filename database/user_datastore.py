@@ -9,7 +9,10 @@ class UserDatastore:
     CURRENT_CAT_TABLE = "CurrentCat"
     USER_CONFIG_TABLE = "Config"
     TABLE_DEFS = {
-        FOOD_RECORDS_TABLE: ["ItemID TEXT NOT NULL", "Timestamp INT NOT NULL"],
+        FOOD_RECORDS_TABLE: [
+            "ItemID TEXT NOT NULL",
+            "Timestamp INT NOT NULL"  # Epoch time in nanoseconds
+        ],
         CURRENT_CAT_TABLE: [
             "Size INT NOT NULL",
             "Calories INT NOT NULL",
@@ -41,15 +44,15 @@ class UserDatastore:
         ]
     }
 
-    def __init__(self, user_db_path):
+    def __init__(self, user_db_path, check_same_thread=True):
         self.path = user_db_path
-        self._connect_to_database()
+        self._connect_to_database(check_same_thread)
         self._setup_database()
         self.columns = {}  # Lazy
 
-    def _connect_to_database(self):
+    def _connect_to_database(self, check_same_thread):
         Path(os.path.dirname(self.path)).mkdir(parents=True, exist_ok=True)
-        self.connection = sqlite3.connect(self.path)
+        self.connection = sqlite3.connect(self.path, check_same_thread=check_same_thread)
         self.cursor = self.connection.cursor()
 
     def _setup_database(self):
@@ -125,11 +128,6 @@ class UserDatastore:
             
         # Update
         try:
-            print("UPDATE {} SET {} {} {};".format(
-                    table,
-                    ','.join([f"{k}='{str(v)}'" for k,v in updates.items()]),
-                    ' AND '.join([f"{k}='{str(v)}'" for k,v in equals_conditions.items()])
-                ))
             with self.connection:
                 self.cursor.execute("UPDATE {} SET {} {} {};".format(
                     table,
@@ -146,13 +144,13 @@ class UserDatastore:
 # Testing
 if __name__ == "__main__":
     store = UserDatastore(Path(__file__).parent / "userdata/userdata.db")
-    store.insert("FoodRecords", {"ItemID": "Foodstuffs", "Timestamp": 1000})
-    store.insert("FoodRecords", {"ItemID": "More Food", "Timestamp": 200})
-    store.insert("FoodRecords", {"ItemID": "Even More Food", "Timestamp": 500})
-    print(store.query("FoodRecords", ["ItemID"], {"Timestamp": 200}))
-    store.update("FoodRecords", {"ItemID": "Gobbled"}, {"Timestamp": 1000})
-    store.update("FoodRecords", {"Timestamp": 2000}, {"ItemID": "More Food"})
-    print(store.query("FoodRecords", ["Timestamp", "ItemID"], {"ItemID": "Gobbled"}))
+    # store.insert("FoodRecords", {"ItemID": "Foodstuffs", "Timestamp": 1000})
+    # store.insert("FoodRecords", {"ItemID": "More Food", "Timestamp": 200})
+    # store.insert("FoodRecords", {"ItemID": "Even More Food", "Timestamp": 500})
+    # print(store.query("FoodRecords", ["ItemID"], {"Timestamp": 200}))
+    # store.update("FoodRecords", {"ItemID": "Gobbled"}, {"Timestamp": 1000})
+    # store.update("FoodRecords", {"Timestamp": 2000}, {"ItemID": "More Food"})
+    # print(store.query("FoodRecords", ["Timestamp", "ItemID"], {"ItemID": "Gobbled"}))
     print(store.query("FoodRecords"))
-    print(store._get_table_size("FoodRecords"))
+    print(store.get_table_size("FoodRecords"))
     
