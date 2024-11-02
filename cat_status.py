@@ -23,6 +23,12 @@ class Cat:
         return (f"Cat(size={self.size}, happiness={self.happiness}, calories={self.calories}, "
                 f"sugar={self.sugar}, protein={self.protein}, total_fat={self.total_fat}, "
                 f"saturated_fat={self.saturated_fat}, trans_fat={self.trans_fat}, salt={self.salt})")
+    
+    def equal_graphics(self, old_cat):
+        if self.size == old_cat.size and self.diabetes == old_cat.diabetes and self.hbp == old_cat.hbp and self.cholesterol == old_cat.cholesterol and self.death == old_cat.death:
+            return True
+        else:
+            return False
 
 def cat_day(cat, ideal_cat):
     cat.sugar -= ideal_cat.sugar

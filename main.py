@@ -8,6 +8,7 @@ import database
 import time
 import threading
 from frontend_logic import cat
+import copy
 
 # Time interval (in seconds)
 dt = 1
@@ -25,15 +26,26 @@ def main(my_cat, dt):
                     saturated_fat=nutrient.saturated_fat_recommended(cal), 
                     trans_fat=5,
                     salt=6000)
-    
+    cat.create_fat_happy_cat(my_cat.size)
     t = 0
-    
+    update(t, my_cat, ideal_cat, dt)
     while True:
-        if t == 24:
-            my_cat = cat_status.cat_day(my_cat, ideal_cat)
-            t = 0
-        my_cat = cat_status.cat_hour(my_cat, ideal_cat)
+        check_food(my_cat, layer)
+    
 
+def check_food(my_cat, layer):
+    food = input("what did you eat?")
+    if food != None:
+        my_cat = cat_status.cat_eat(my_cat, food, layer)
+
+def update(t, my_cat, ideal_cat, dt):
+    old_cat = copy.deepcopy(my_cat)
+    if t == 24:
+        my_cat = cat_status.cat_day(my_cat, ideal_cat)
+        t = 0
+    my_cat = cat_status.cat_hour(my_cat, ideal_cat)
+
+    if my_cat.equal_graphics(old_cat) == False:
         if my_cat.death > 0:
             cat.dead_cat(my_cat.death)
         if my_cat.diabetes > 0 or my_cat.hbp > 0 or my_cat.cholesterol > 0:
@@ -46,15 +58,8 @@ def main(my_cat, dt):
             cat.high_cholestrol()
         else:
             cat.create_fat_happy_cat(my_cat.size)
-        t+=1
-        time.sleep(dt)
+    t+=1
+    threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt)).start()
 
-def check_food(my_cat, layer):
-    food = input("what did you eat?")
-    if food != None:
-        my_cat = cat_status.cat_eat(my_cat, food, layer)
-
-    
 if __name__ == "__main__":
     main(my_cat,dt)
-    threading.Thread(target=check_food(my_cat, layer), daemon=True).start()
