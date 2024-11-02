@@ -18,7 +18,7 @@ def calories_recommended(gender="M", height=180, weight=70, age=30, active=1):
     elif active == 3:
         amr = bmr * 1.725
     else:
-        amr = bmr * 1.9``
+        amr = bmr * 1.9
 
     return amr
 
