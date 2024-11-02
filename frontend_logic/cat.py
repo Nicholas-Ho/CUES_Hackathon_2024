@@ -25,7 +25,6 @@ def dead_cat(number=0):
     ]
     print("Dead cat counter: " + str(number))
     return "\n".join(cat_lines)
-print(dead_cat(3))
 
 def diabetes():
     cat_with_diabetes = r"""
