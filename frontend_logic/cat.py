@@ -26,3 +26,33 @@ def dead_cat(number=0):
     print("Dead cat counter: " + str(number))
     return "\n".join(cat_lines)
 print(dead_cat(3))
+
+def diabetes():
+    cat_with_diabetes = r"""
+                  ________________
+                 /I have diabetes,\
+                 |please reduce   |
+                 |sugar.          |
+                  \_______________/
+    """
+    return cat_with_diabetes
+
+def high_blood_pressure():
+    cat = r"""
+                  _________________
+                 / I have high blood\
+                 |pressure, please   |
+                 |reduce salt intake.|
+                  \_________________/
+    """
+    return cat
+
+def high_cholestrol():
+    cat = r"""
+                  _________________
+                 / I have high      \
+                 |cholestrol, please |
+                 |reduce fat intake. |
+                  \_________________/
+    """
+    return cat
