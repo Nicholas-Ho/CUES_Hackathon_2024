@@ -2,7 +2,7 @@ import database.data_layer
 import database.food_database
 import nutrient
 import cat_status
-import frontend_logic
+from frontend_logic import user_input
 from pathlib import Path
 import database
 import time
@@ -12,11 +12,11 @@ from frontend_logic import cat
 # Time interval (in seconds)
 dt = 1
 my_cat = cat_status.Cat()
-food_data_path = Path(__file__).parent / "data/restaurant_sample.csv"
+food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 layer = database.data_layer.DataLayer(food_data_path)
 
 def main():
-    ans = frontend_logic.input.get_input_data()
+    ans = user_input.get_input_data()
     cal = nutrient.calories_recommended(ans["gender"], ans["height"], ans["weight2"], ans["age"], ans["active"])
     ideal_cat = cat_status.Cat(calories=cal, 
                     sugar=nutrient.free_sugar(cal), 
