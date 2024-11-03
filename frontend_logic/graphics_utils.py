@@ -4,7 +4,7 @@ from .message_manager import MessageManager
 import sys
 
 def create_fat_sad_cat(fatness=2):
-    spaces = ' ' * int(fatness)
+    spaces = ' ' * min(4, int(fatness))
     fatness_sad = [
         "",
         f"{spaces}/\\_/\\  ",
@@ -15,7 +15,7 @@ def create_fat_sad_cat(fatness=2):
     return fatness_sad
 
 def create_fat_happy_cat(fatness=2):
-    spaces = ' ' * int(fatness)
+    spaces = ' ' * min(4, int(fatness))
     fatness_happy = [
         "",
         f"{spaces}/\\_/\\  ",
