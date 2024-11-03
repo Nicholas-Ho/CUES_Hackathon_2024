@@ -76,7 +76,10 @@ class DataLayer:
             self._user_datastore.update(UserDatastore.CURRENT_CAT_TABLE, update_dict, {}, singleton=True)
 
     def get_cat_data(self):
-        return self._user_datastore.query(UserDatastore.CURRENT_CAT_TABLE)[0]
+        result = self._user_datastore.query(UserDatastore.CURRENT_CAT_TABLE)
+        if len(result) > 0:
+            return result[0]
+        return None
     
 
 # Testing

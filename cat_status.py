@@ -1,3 +1,6 @@
+import copy
+from frontend_logic import graphics_utils
+from frontend_logic.message_manager import MessageManager
 import nutrient
 from database.data_layer import DataLayer
 import time
@@ -29,7 +32,7 @@ class Cat:
         else:
             return False
 
-def cat_day(cat, ideal_cat, layer):
+def cat_day(cat, ideal_cat, layer, message_manager: MessageManager):
     cat.sugar -= ideal_cat.sugar
     cat.protein -= ideal_cat.protein
     cat.total_fat -= ideal_cat.total_fat
@@ -53,13 +56,14 @@ def cat_day(cat, ideal_cat, layer):
         cat.cholesterol = 0
 
     if cat.diabetes>2 or cat.hbp>2 or cat.cholesterol>2:
+        message_manager.add_message(cause_of_death_msg(cat))
         dead = cat.death + 1
         cat = Cat(death = dead)
 
     layer.update_cat_data(cat)
     return cat
     
-def cat_hour(cat, ideal_cat, layer):
+def cat_hour(cat, ideal_cat, layer, message_manager: MessageManager):
     cat.calories -= ideal_cat.calories / 24
     if cat.calories < 0:
         cat.size = cat.calories // ideal_cat.calories + 3  
@@ -67,30 +71,43 @@ def cat_hour(cat, ideal_cat, layer):
         cat.size = cat.calories // ideal_cat.calories + 2
 
     if cat.size<0:
+        message_manager.add_message(cause_of_death_msg(cat))
         dead = cat.death + 1
         cat = Cat(death = dead)
     
     layer.update_cat_data(cat)
     return cat
 
-def cat_eat(cat, food, layer: DataLayer):
+def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
     nutrition = layer.search_food_entries(food)
-    if nutrition is None:
-        print("Warning: no matching food entry was found! Not updating.")
-        return cat
+    if nutrition is not None:
+        cat.calories += nutrition.calories
+        cat.sugar += nutrition.sugars
+        cat.protein += nutrition.protein
+        cat.total_fat += nutrition.total_fat
+        cat.saturated_fat += nutrition.saturated_fat
+        cat.trans_fat += nutrition.trans_fatty_acid
+        cat.salt += nutrition.calories
 
-    cat.calories += nutrition.calories
-    cat.sugar += nutrition.sugars
-    cat.protein += nutrition.protein
-    cat.total_fat += nutrition.total_fat
-    cat.saturated_fat += nutrition.saturated_fat
-    cat.trans_fat += nutrition.trans_fatty_acid
-    cat.salt += nutrition.calories
+        layer.add_food_record(nutrition, timestamp=time.time_ns())
+        layer.update_cat_data(cat)
 
-    layer.add_food_record(nutrition, timestamp=time.time_ns())
-    layer.update_cat_data(cat)
+        message_manager.add_message(f"{nutrition.item_name} successfully added!")
+    else:
+        message_manager.add_message("Warning: no matching food entry was found! Not updating.")
 
+    graphics_utils.generate_graphics(cat, message_manager, print_output=True)
     return cat
 
-
+def cause_of_death_msg(cat):
+    causes = []
+    if cat.diabetes>2:
+        causes.append("Diabetes")
+    if cat.hbp>2:
+        causes.append("High blood pressure")
+    if cat.cholesterol>2:
+        causes.append("Cholesterol")
+    if cat.size<0:
+        causes.append("Starvation")
+    return f"Your cat died! Cause of death: {', '.join(causes)}"
                 

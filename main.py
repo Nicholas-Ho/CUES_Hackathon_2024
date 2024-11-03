@@ -7,7 +7,8 @@ from pathlib import Path
 import database
 import time
 import threading
-from frontend_logic import cat
+from frontend_logic import graphics_utils
+from frontend_logic.message_manager import MessageManager
 import copy
 import os
 
@@ -17,16 +18,18 @@ my_cat = cat_status.Cat()
 food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 user_db_path = Path(__file__).parent / "database/userdata/userdata.db"
 layer = database.data_layer.DataLayer(food_data_path, user_db_path, multithreading=True)
+message_manager = MessageManager("what did you eat?")
 
 cat_data = layer.get_cat_data()
 if cat_data is not None:
     (my_cat.size, my_cat.calories, my_cat.sugar, my_cat.protein, my_cat.total_fat, my_cat.saturated_fat,
         my_cat.trans_fat, my_cat.salt, my_cat.diabetes, my_cat.hbp, my_cat.cholesterol, my_cat.death, _) = cat_data
+    message_manager.add_message("Cat loaded from prior session.")
 
 def main(my_cat, dt):
     ans = layer.get_user_config()
     if ans is not None:
-        print("User data loaded from prior session.")
+        message_manager.add_message("User data loaded from prior session.")
     else:
         ans = user_input.get_input_data()
         layer.set_user_config(ans)
@@ -39,41 +42,30 @@ def main(my_cat, dt):
                     trans_fat=5,
                     salt=6000)
     os.system('cls' if os.name == 'nt' else 'clear')
-    cat.create_fat_happy_cat(my_cat.size)
+    graphics_utils.generate_graphics(my_cat, message_manager, print_output=True)
     t = 0
-    update(t, my_cat, ideal_cat, dt, layer)
+    update(t, my_cat, ideal_cat, dt, layer, message_manager)
     while True:
-        check_food(my_cat, layer)
+        check_food(my_cat, layer, message_manager)
     
 
-def check_food(my_cat, layer):
-    food = input("what did you eat?")
+def check_food(my_cat, layer, message_manager):
+    food = input("\n")
     if food != None:
-        my_cat = cat_status.cat_eat(my_cat, food, layer)
+        my_cat = cat_status.cat_eat(my_cat, food, layer, message_manager)
 
-def update(t, my_cat, ideal_cat, dt, layer):
+def update(t, my_cat, ideal_cat, dt, layer, message_manager):
     old_cat = copy.deepcopy(my_cat)
     if t == 24:
-        my_cat = cat_status.cat_day(my_cat, ideal_cat, layer)
+        my_cat = cat_status.cat_day(my_cat, ideal_cat, layer, message_manager)
         t = 0
-    my_cat = cat_status.cat_hour(my_cat, ideal_cat, layer)
+    my_cat = cat_status.cat_hour(my_cat, ideal_cat, layer, message_manager)
 
     if my_cat.equal_graphics(old_cat) == False:
-        cat.clear_lines()
-        if my_cat.death > 0:
-            cat.dead_cat(my_cat.death)
-        if my_cat.diabetes > 0 or my_cat.hbp > 0 or my_cat.cholesterol > 0:
-            cat.create_fat_sad_cat(my_cat.size)
-        if my_cat.diabetes > 0:
-            cat.diabetes()
-        if my_cat.hbp > 0:
-            cat.high_blood_pressure()
-        if my_cat.cholesterol > 0:
-            cat.high_cholestrol()
-        else:
-            cat.create_fat_happy_cat(my_cat.size)
+        graphics_utils.generate_graphics(my_cat, message_manager, print_output=True)
+
     t+=1
-    threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt, layer)).start()
+    threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt, layer, message_manager)).start()
 
 if __name__ == "__main__":
     main(my_cat,dt)
