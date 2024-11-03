@@ -67,7 +67,7 @@ def generate_statuses(curr_cat):
     return None
 
 def generate_speech_bubble(content: str, width=30):
-    width = min(width, len(content)+2)
+    width = max(min(width, len(content)+2), len(max(content.split(), key=lambda x: len(x)))+1)
     bubble = []
     bubble.append(' ' + '_' * (width + 1) + ' ')
     
@@ -75,8 +75,6 @@ def generate_speech_bubble(content: str, width=30):
     chars_in_line = width
     curr_line = '/'
     while len(words) > 0:
-        if len(words[0]) > width:
-            print("Text contains words that do not fit in speech bubble:", words[0], file=sys.stderr)
         if chars_in_line < len(words[0]) + 1:
             curr_line += ' ' * chars_in_line
             curr_line += ' \\' if curr_line[0] == '/' else ' |'
