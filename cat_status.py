@@ -87,7 +87,7 @@ def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
         cat.total_fat += nutrition.total_fat
         cat.saturated_fat += nutrition.saturated_fat
         cat.trans_fat += nutrition.trans_fatty_acid
-        cat.salt += nutrition.calories
+        cat.salt += nutrition.salt
 
         layer.add_food_record(nutrition, timestamp=time.time_ns())
         layer.update_cat_data(cat)
