@@ -18,8 +18,12 @@ food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 user_db_path = Path(__file__).parent / "database/userdata/userdata.db"
 layer = database.data_layer.DataLayer(food_data_path, user_db_path, multithreading=True)
 
+cat_data = layer.get_cat_data()
+if cat_data is not None:
+    (my_cat.size, my_cat.calories, my_cat.sugar, my_cat.protein, my_cat.total_fat, my_cat.saturated_fat,
+        my_cat.trans_fat, my_cat.salt, my_cat.diabetes, my_cat.hbp, my_cat.cholesterol, my_cat.death, _) = cat_data
+
 def main(my_cat, dt):
-    cat.clear_lines()
     ans = layer.get_user_config()
     if ans is not None:
         print("User data loaded from prior session.")
