@@ -68,4 +68,8 @@ def update(t, my_cat, ideal_cat, dt, layer, message_manager):
     threading.Timer(dt, lambda: update(t, my_cat, ideal_cat, dt, layer, message_manager)).start()
 
 if __name__ == "__main__":
-    main(my_cat,dt)
+    try:
+        main(my_cat,dt)
+    except KeyboardInterrupt:
+        print("Exiting...")
+        os._exit(1)
