@@ -83,4 +83,6 @@ class FoodDatabase:
         if get_all:
             return [NutritionData(result.iloc[i]) for i in range(result.shape[0])]
         else:
+            if result.shape[0] == 0:
+                return None
             return NutritionData(result.iloc[0])

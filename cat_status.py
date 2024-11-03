@@ -75,6 +75,10 @@ def cat_hour(cat, ideal_cat, layer):
 
 def cat_eat(cat, food, layer: DataLayer):
     nutrition = layer.search_food_entries(food)
+    if nutrition is None:
+        print("Warning: no matching food entry was found! Not updating.")
+        return cat
+
     cat.calories += nutrition.calories
     cat.sugar += nutrition.sugars
     cat.protein += nutrition.protein
