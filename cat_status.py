@@ -73,9 +73,12 @@ def cat_hour(cat, ideal_cat):
     return cat
 
 def cat_eat(cat, food, layer):
-    food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
-    layer = database.data_layer.DataLayer(food_data_path)
-    nutrition = layer.search_food_entries(food)
+    try: 
+        food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
+        layer = database.data_layer.DataLayer(food_data_path)
+        nutrition = layer.search_food_entries(food)
+    except:
+        return cat
     cat.calories += nutrition.calories
     cat.sugar += nutrition.sugars
     cat.protein += nutrition.protein
