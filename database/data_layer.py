@@ -16,8 +16,8 @@ class DataLayer:
         item_ids = self._food_database.get_id_from_name(name)
         return [self._food_database.get_entry(item_id) for item_id in item_ids]
     
-    def search_food_entries(self, query):
-        return self._food_database.search_database(query)
+    def search_food_entries(self, query, get_all=False):
+        return self._food_database.search_database(query, get_all)
     
     # User datastore
     def add_food_record(self, record: NutritionData, timestamp=None):
