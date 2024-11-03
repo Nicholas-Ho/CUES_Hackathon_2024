@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import sys
 import sqlite3
+import threading
 
 class UserDatastore:
     LOCK_COL_NAME = "Lock"
@@ -49,6 +50,7 @@ class UserDatastore:
         self._connect_to_database(check_same_thread)
         self._setup_database()
         self.columns = {}  # Lazy
+        self.lock = threading.Lock()
 
     def _connect_to_database(self, check_same_thread):
         Path(os.path.dirname(self.path)).mkdir(parents=True, exist_ok=True)
@@ -67,17 +69,36 @@ class UserDatastore:
         self.cursor.close()
         self.connection.close()
 
+    def _blocking_execute(self, query, process="Query", get_result=True, commit=False):
+        try:
+            self.lock.acquire(True)
+            self.cursor.execute(query)
+            result = self.cursor.fetchall()
+            if commit:
+                self.connection.commit()
+            success = True
+        except Exception as e:
+            print(f"SQLite {process} failed with exception:", e)
+            result = None
+            success = False
+        finally:
+            self.lock.release()
+            if get_result:
+                return result
+            return success
+
     def _get_table_columns(self, table):
         if table in self.columns:  # Lazy getting
             return self.columns[table]
-        self.cursor.execute(f"PRAGMA table_info({table});")
-        columns = [entry[1] for entry in self.cursor if entry[1] != UserDatastore.LOCK_COL_NAME]
+        result = self._blocking_execute(f"PRAGMA table_info({table});", "Get Columns")
+        columns = [entry[1] for entry in result if entry[1] != UserDatastore.LOCK_COL_NAME]
         self.columns[table] = columns
         return columns
 
     def get_table_size(self, table):
-        self.cursor.execute(f"SELECT COUNT(1) FROM {table}")
-        return self.cursor.fetchall()[0][0]
+        result = self._blocking_execute(f"SELECT COUNT(1) FROM {table}", "Get Size")
+        result = result[0][0]
+        return result
 
     def query(self, table, target_cols=[], equals_conditions={}):
         columns = set(self._get_table_columns(table))
@@ -85,13 +106,14 @@ class UserDatastore:
             if col not in columns:
                 print(f"Column '{col}' not found in table '{table}'.", file=sys.stderr)
                 return []
-        self.cursor.execute("SELECT {} FROM {} {} {};".format(
-             '*' if len(target_cols) == 0 else ','.join(target_cols),
-             table,
-             'WHERE' if len(equals_conditions) > 0 else '',
-             ' AND '.join([f"{k}='{str(v)}'" for k,v in equals_conditions.items()])
-        ))
-        return self.cursor.fetchall()
+        
+        result = self._blocking_execute("SELECT {} FROM {} {} {};".format(
+            '*' if len(target_cols) == 0 else ','.join(target_cols),
+            table,
+            'WHERE' if len(equals_conditions) > 0 else '',
+            ' AND '.join([f"{k}='{str(v)}'" for k,v in equals_conditions.items()])
+        ), "Query")
+        return result
     
     def insert(self, table, entry: dict):
         columns = set(self._get_table_columns(table))
@@ -104,10 +126,14 @@ class UserDatastore:
         for k,v in entry.items():
             keys.append(f"'{k}'")
             values.append(f"'{str(v)}'")
-        with self.connection:
-            self.cursor.execute(f"INSERT INTO {table} \
-                                ({','.join(keys)}) VALUES \
-                                ({','.join(values)});")
+
+        success = self._blocking_execute(f"INSERT INTO {table} \
+                                        ({','.join(keys)}) VALUES \
+                                        ({','.join(values)});",
+                                        "Insert",
+                                        get_result=False,
+                                        commit=True)
+        return success
             
     def update(self, table, updates: dict, equals_conditions, singleton=False):
         # Check singletons
@@ -127,18 +153,13 @@ class UserDatastore:
                 return False
             
         # Update
-        try:
-            with self.connection:
-                self.cursor.execute("UPDATE {} SET {} {} {};".format(
-                    table,
-                    ','.join([f"{k}='{str(v)}'" for k,v in updates.items()]),
-                    'WHERE' if not singleton else '',
-                    ' AND '.join([f"{k}='{str(v)}'" for k,v in equals_conditions.items()] if not singleton else '')
-                ))
-        except Exception as e:
-            print("SQLite Update failed with exception:", e, file=sys.stderr)
-            return False
-        return True
+        success = self._blocking_execute("UPDATE {} SET {} {} {};".format(
+            table,
+            ','.join([f"{k}='{str(v)}'" for k,v in updates.items()]),
+            'WHERE' if not singleton else '',
+            ' AND '.join([f"{k}='{str(v)}'" for k,v in equals_conditions.items()] if not singleton else '')
+        ), "Update", get_result=False, commit=True)
+        return success
 
 
 # Testing

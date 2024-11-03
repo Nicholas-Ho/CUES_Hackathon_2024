@@ -19,6 +19,7 @@ user_db_path = Path(__file__).parent / "database/userdata/userdata.db"
 layer = database.data_layer.DataLayer(food_data_path, user_db_path, multithreading=True)
 
 def main(my_cat, dt):
+    cat.clear_lines()
     ans = layer.get_user_config()
     if ans is not None:
         print("User data loaded from prior session.")
