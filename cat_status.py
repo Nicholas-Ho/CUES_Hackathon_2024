@@ -4,7 +4,6 @@ from frontend_logic.message_manager import MessageManager
 import nutrient
 from database.data_layer import DataLayer
 import time
-
 class Cat:
     def __init__(self, size=2, happiness=True, calories=0, sugar=0, protein=0, total_fat=0, saturated_fat=0, trans_fat=0, salt=0, diabetes=0, hbp=0, cholesterol=0, death=0):
         self.size = size
@@ -81,6 +80,17 @@ def cat_hour(cat, ideal_cat, layer, message_manager: MessageManager):
 def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
     nutrition = layer.search_food_entries(food)
     if nutrition is not None:
+        out_str = "What is it?\n"
+        for i in range(len(list(nutrition))):
+            out_str += f"{i}. {nutrition[i].item_name}\n"
+        s=input(out_str)
+        valid = ["0", "1", "2", "3", "4"]
+        if s not in valid:
+            print("Error")
+        s_index = int(s)
+        if s_index >= len(list(nutrition)):
+            print("Error, too big")
+        nutrition=nutrition[s_index]
         cat.calories += nutrition.calories
         cat.sugar += nutrition.sugars
         cat.protein += nutrition.protein
@@ -90,8 +100,7 @@ def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
         cat.salt += nutrition.calories
 
         layer.add_food_record(nutrition, timestamp=time.time_ns())
-        layer.update_cat_data(cat)
-
+        layer.update_cat_data(cat)       
         message_manager.add_message(f"{nutrition.item_name} successfully added!")
     else:
         message_manager.add_message("Warning: no matching food entry was found! Not updating.")

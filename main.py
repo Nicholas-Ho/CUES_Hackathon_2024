@@ -13,7 +13,7 @@ import copy
 import os
 
 # Time interval (in seconds)
-dt = 0.2
+dt = 4
 my_cat = cat_status.Cat()
 food_data_path = Path(__file__).parent / "database/data/restaurant_sample.csv"
 user_db_path = Path(__file__).parent / "database/userdata/userdata.db"

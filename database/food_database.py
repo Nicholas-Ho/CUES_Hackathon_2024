@@ -67,7 +67,7 @@ class FoodDatabase:
     def get_id_from_name(self, name):
         return self.dataframe[self.dataframe["item_name"] == name]["item_id"].to_list()
     
-    def search_database(self, query: str, get_all=False, search_mode="or"):
+    def search_database(self, query: str, get_all=True, search_mode="or"):
         query_terms = set([word.lower() for word in query.split()])
 
         # Permissive, wide search: use OR
@@ -81,7 +81,7 @@ class FoodDatabase:
         
         result = self.dataframe[condition(self.dataframe["item_name"])]
         if get_all:
-            return [NutritionData(result.iloc[i]) for i in range(result.shape[0])]
+            return [NutritionData(result.iloc[i]) for i in range(min(5, result.shape[0]))]
         else:
             if result.shape[0] == 0:
                 return None
