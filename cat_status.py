@@ -78,7 +78,7 @@ def cat_hour(cat, ideal_cat, layer, message_manager: MessageManager):
     return cat
 
 def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
-    nutrition = layer.search_food_entries(food)
+    nutrition = layer.search_food_entries(food, get_all=True)
     if nutrition is not None:
         out_str = "What is it?\n"
         for i in range(len(list(nutrition))):
@@ -97,7 +97,7 @@ def cat_eat(cat, food, layer: DataLayer, message_manager: MessageManager):
         cat.total_fat += nutrition.total_fat
         cat.saturated_fat += nutrition.saturated_fat
         cat.trans_fat += nutrition.trans_fatty_acid
-        cat.salt += nutrition.salt
+        cat.salt += nutrition.sodium
 
         layer.add_food_record(nutrition, timestamp=time.time_ns())
         layer.update_cat_data(cat)       
